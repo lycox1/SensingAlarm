@@ -21,25 +21,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import adparser.AdElement;
 import adparser.AdParser;
 //import lsw.alarmapp1.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TimePicker.OnTimeChangedListener {
 
 //public class MainActivity extends ListActivity {
 
-    int hour, minute;
+//    int hour, minute;
+    private TimePicker mTime;
+//    private DatePicker mDate;
+    private GregorianCalendar mCalendar;;
     TextView deviceNameView, addressView, rssiView;
+    SampleAlarmReceiver alarm = new SampleAlarmReceiver();
 
     private static final String LOG_TAG = "BLEScan";
-    private LeDeviceListAdapter mLeDeviceListAdapter;
+//    private LeDeviceListAdapter mLeDeviceListAdapter;
     private Handler mHandler;
     private boolean mScanning;
     private BluetoothAdapter mBluetoothAdapter;
@@ -55,7 +63,18 @@ public class MainActivity extends AppCompatActivity {
 
 //        getActionBar().setTitle("BLE Device Scan");
 
-        findViewById(R.id.alarmSet).setOnClickListener(mClickListener);
+        mCalendar = new GregorianCalendar();
+        mCalendar.setTimeInMillis(System.currentTimeMillis());
+
+//        mDate.init (mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH), this);
+        mTime = (TimePicker)findViewById(R.id.time_picker);
+        mTime.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
+        mTime.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
+        mTime.setOnTimeChangedListener(this);
+
+        findViewById(R.id.set).setOnClickListener(mClickListener);
+        findViewById(R.id.reset).setOnClickListener(mClickListener);
+
         deviceNameView = (TextView)findViewById(R.id.DeviceName);
         addressView = (TextView)findViewById(R.id.Address);
         rssiView = (TextView)findViewById(R.id.Rssi);
@@ -89,30 +108,35 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        if (!mScanning) {
-            menu.findItem(R.id.menu_stop).setVisible(false);
-            menu.findItem(R.id.menu_scan).setVisible(true);
-            menu.findItem(R.id.menu_refresh).setActionView(null);
-        } else {
-            menu.findItem(R.id.menu_stop).setVisible(true);
-            menu.findItem(R.id.menu_scan).setVisible(false);
-            menu.findItem(R.id.menu_refresh).setActionView(
+//        if (!mScanning) {
+            menu.findItem(R.id.menu1).setVisible(true);
+            menu.findItem(R.id.menu2).setVisible(true);
+            menu.findItem(R.id.menu3).setVisible(true);
+/*        } else {
+            menu.findItem(R.id.menu1).setVisible(true);
+            menu.findItem(R.id.menu2).setVisible(false);
+            menu.findItem(R.id.menu3).setActionView(
                     R.layout.actionbar_indeterminate_progress); // res/layout/actionbar_indeterminate_progress.xml
         }
+        */
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_scan:
+            case R.id.menu1:
                 Log.d(LOG_TAG, "onOptionsItemSelected menu_scan");
-                mLeDeviceListAdapter.clear();
-                scanLeDevice(true);
+//                mLeDeviceListAdapter.clear();
+//                scanLeDevice(true);
                 break;
-            case R.id.menu_stop:
+            case R.id.menu2:
                 Log.d(LOG_TAG, "onOptionsItemSelected menu_stop");
-                scanLeDevice(false);
+//                scanLeDevice(false);
+                break;
+            case R.id.menu3:
+                Log.d(LOG_TAG, "onOptionsItemSelected menu_stop");
+//                scanLeDevice(false);
                 break;
         }
         return true;
@@ -132,9 +156,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Initializes list view adapter.
-        mLeDeviceListAdapter = new LeDeviceListAdapter();
-//        setListAdapter(mLeDeviceListAdapter);
-        scanLeDevice(true);
+//        mLeDeviceListAdapter = new LeDeviceListAdapter();
     }
 
     @Override
@@ -151,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         scanLeDevice(false);
-        mLeDeviceListAdapter.clear();
+//        mLeDeviceListAdapter.clear();
     }
 
 /*    @Override
@@ -192,13 +214,14 @@ public class MainActivity extends AppCompatActivity {
 		invalidateOptionsMenu();
 	}
 
+    /*
     static class ViewHolder {
         TextView deviceName;
         TextView deviceAd;
         TextView deviceRssi;
         TextView deviceAddress;
     }
-
+    */
     class DeviceHolder {
         BluetoothDevice device;
         String additionalData;
@@ -210,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
             this.rssi = rssi;
         }
     }
+    /*
     // Adapter for holding devices found through scanning.
     private class LeDeviceListAdapter extends BaseAdapter {
         private ArrayList<BluetoothDevice> mLeDevices;
@@ -284,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
             return view;
         }
     }
+    */
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -317,8 +342,6 @@ public class MainActivity extends AppCompatActivity {
                     DeviceHolder deviceHolder = new DeviceHolder(device,additionalData,rssi);
 
                     runOnUiThread(new DeviceAddTask(deviceHolder));
-
-
                 }
             };
 
@@ -343,30 +366,75 @@ public class MainActivity extends AppCompatActivity {
                     rssiView.setText("rssi : " + Integer.toString(deviceHolder.rssi));
                 }
             }
-            mLeDeviceListAdapter.addDevice(deviceHolder);
-            mLeDeviceListAdapter.notifyDataSetChanged();
+//            mLeDeviceListAdapter.addDevice(deviceHolder);
+//            mLeDeviceListAdapter.notifyDataSetChanged();
         }
+    }
+
+
+
+/*    //일자 설정 클래스의 상태변화 리스너
+    public void onDateChanged (DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        mCalendar.set (year, monthOfYear, dayOfMonth, mTime.getCurrentHour(), mTime.getCurrentMinute());
+        Log.i("HelloAlarmActivity", mCalendar.getTime().toString());
+    }
+*/
+    //시각 설정 클래스의 상태변화 리스너
+    public void onTimeChanged (TimePicker view, int hourOfDay, int minute) {
+        mCalendar.set (mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), mCalendar.get(Calendar.DAY_OF_MONTH), hourOfDay, minute);
+        Log.i("HelloAlarmActivity",mCalendar.getTime().toString());
     }
 
     Button.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            EditText hour = (EditText)findViewById(R.id.alarmHour);
-            EditText minute = (EditText)findViewById(R.id.alarmMinute);
-            switch (v.getId()) {
-                case R.id.alarmSet:
-                    String hourString = hour.getText().toString();
-                    String minutesString = minute.getText().toString();
-                    Toast.makeText(MainActivity.this, hourString, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(MainActivity.this, minutesString, Toast.LENGTH_SHORT).show();
+//            EditText hour = (EditText)findViewById(R.id.alarmHour);
+//            EditText minute = (EditText)findViewById(R.id.alarmMinute);
 
+            switch (v.getId()) {
+                case R.id.set:
+                    Log.i(LOG_TAG,"onClick set button click");
+                    alarm.setAlarm(MainActivity.this, mCalendar);
+                    break;
+
+/*                case R.id.alarmSet:
+                    String hourString = hour.getText().toString();
+                    int hourInt = Integer.valueOf(hourString);
+                    String minutesString = minute.getText().toString();
+                    int minuteInt = Integer.valueOf(minutesString);
+
+                    Log.d(LOG_TAG, "onClick: alarm.setAlarm");
+                    alarm.setAlarm(MainActivity.this, hourInt, minuteInt);
+
+//                    setAlarm(MainActivity.this, 11);
+//                    Toast.makeText(MainActivity.this, hourString, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, minutesString, Toast.LENGTH_SHORT).show();
+                    /*
                     Intent intent = new Intent(MainActivity.this,
                             AlarmReceive.class);
                     PendingIntent pender = PendingIntent.getBroadcast(
                             MainActivity.this, 0, intent, 0);
+                    Calendar calendar = Calendar.getInstance();
+                    Log.d(LOG_TAG, "onClick set alarm 2015 11 2 , " + hourInt + " " + minuteInt);
+                    calendar.set(2015, 11, 2, hourInt, minuteInt);
+                    alarm.set(AlarmManager.RTC, calendar.getTimeInMillis(), pender);
+                    */
+//                    break;
 
-                    break;
             }
         }
     };
+
+    /*
+    private void setAlarm(Context context, long second){
+
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(getApplicationContext(), AlarmReceive.class);
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+        Log.i(LOG_TAG, "setAlarm()" + System.currentTimeMillis());
+        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, pIntent);
+    }
+    */
 
 }
