@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 import android.widget.TimePicker;
@@ -29,12 +30,16 @@ public class SampleAlarmReceiver extends BroadcastReceiver {
     private AlarmManager alarmMgr;
     // The pending intent that is triggered when the alarm fires.
     private PendingIntent alarmIntent;
-
+//    public AlarmActivity alarmActivity = new AlarmActivity();
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("BLEScan", "onReceive is called");
         Toast.makeText(context, "SampleAlarmReceiver Called", Toast.LENGTH_LONG).show();
+        Intent AlarmActivityIntent = new Intent(context, AlarmActivity.class);
+        AlarmActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(AlarmActivityIntent);
+        //scanLeDevice(true);
     }
 
     // BEGIN_INCLUDE(set_alarm)
@@ -48,8 +53,6 @@ public class SampleAlarmReceiver extends BroadcastReceiver {
         alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SampleAlarmReceiver.class);
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-
 
         /*
         Calendar calendar = Calendar.getInstance();

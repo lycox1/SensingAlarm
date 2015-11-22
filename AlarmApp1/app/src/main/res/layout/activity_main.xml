@@ -19,7 +19,7 @@ android:orientation="vertical">
 
     <LinearLayout
         android:orientation="vertical"
-        android:gravity="left"
+        android:gravity="center"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <TimePicker
@@ -47,31 +47,6 @@ android:orientation="vertical">
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/DeviceName"
-            android:layout_gravity="left|top"
-            android:text="Device is not detected " />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/Address"
-            android:layout_gravity="left|top"
-            android:text="Address is not detected" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/Rssi"
-            android:layout_gravity="left|top"
-            android:text="rssi is not detected" />
-    </LinearLayout>
 
 </LinearLayout>
